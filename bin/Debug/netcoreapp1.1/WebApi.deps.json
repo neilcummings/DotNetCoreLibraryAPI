@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v1.1",
-    "signature": "637c6e22bc6bc3d7e36684779253e2043e4df1a8"
+    "signature": "b78330f12482caa3adc9af266397aa97886adc31"
   },
   "compilationOptions": {
     "defines": [
@@ -34,7 +34,8 @@
           "Microsoft.Extensions.Logging.Debug": "1.1.2",
           "Microsoft.NETCore.App": "1.1.2",
           "NLog.Web.AspNetCore": "4.4.1",
-          "System.IdentityModel.Tokens.Jwt": "5.1.4"
+          "System.IdentityModel.Tokens.Jwt": "5.1.4",
+          "System.Linq.Dynamic.Core": "1.0.7.6"
         },
         "runtime": {
           "WebApi.dll": {}
@@ -1281,7 +1282,7 @@
           "System.Diagnostics.Contracts": "4.3.0",
           "System.Diagnostics.Process": "4.3.0",
           "System.Diagnostics.StackTrace": "4.3.0",
-          "System.Diagnostics.TraceSource": "4.0.0",
+          "System.Diagnostics.TraceSource": "4.3.0",
           "System.IO.FileSystem.AccessControl": "4.0.0",
           "System.IO.FileSystem.Watcher": "4.3.0",
           "System.Net.NameResolution": "4.3.0",
@@ -1472,7 +1473,7 @@
           "ref/netstandard1.3/System.Diagnostics.StackTrace.dll": {}
         }
       },
-      "system.diagnostics.tracesource/4.0.0": {
+      "system.diagnostics.tracesource/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
           "System.Collections": "4.3.0",
@@ -1550,6 +1551,23 @@
         },
         "compile": {
           "ref/netstandard1.3/System.IO.FileSystem.AccessControl.dll": {}
+        }
+      },
+      "system.linq.dynamic.core/1.0.7.6": {
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.ComponentModel.TypeConverter": "4.3.0",
+          "System.Diagnostics.TraceSource": "4.3.0",
+          "System.Dynamic.Runtime": "4.3.0",
+          "System.Linq.Queryable": "4.3.0",
+          "System.Reflection.Emit": "4.3.0",
+          "System.Reflection.TypeExtensions": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.3/System.Linq.Dynamic.Core.dll": {}
+        },
+        "compile": {
+          "lib/netstandard1.3/System.Linq.Dynamic.Core.dll": {}
         }
       },
       "system.net.websockets/4.3.0": {
@@ -2717,6 +2735,9 @@
           "System.Reflection.Primitives": "4.3.0",
           "System.Runtime": "4.3.0"
         },
+        "compile": {
+          "ref/netstandard1.1/System.Reflection.Emit.dll": {}
+        },
         "compileOnly": true
       },
       "system.reflection.emit.ilgeneration/4.3.0": {
@@ -2724,6 +2745,9 @@
           "System.Reflection": "4.3.0",
           "System.Reflection.Primitives": "4.3.0",
           "System.Runtime": "4.3.0"
+        },
+        "compile": {
+          "ref/netstandard1.0/System.Reflection.Emit.ILGeneration.dll": {}
         },
         "compileOnly": true
       },
@@ -3994,12 +4018,12 @@
       "path": "system.diagnostics.stacktrace/4.3.0",
       "hashPath": "system.diagnostics.stacktrace.4.3.0.nupkg.sha512"
     },
-    "system.diagnostics.tracesource/4.0.0": {
+    "system.diagnostics.tracesource/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6WVCczFZKXwpWpzd/iJkYnsmWTSFFiU24Xx/YdHXBcu+nFI/ehTgeqdJQFbtRPzbrO3KtRNjvkhtj4t5/WwWsA==",
-      "path": "system.diagnostics.tracesource/4.0.0",
-      "hashPath": "system.diagnostics.tracesource.4.0.0.nupkg.sha512"
+      "sha512": "sha512-ni8TtCWzTTq59rO85t/4Y2acPbk2uhXDqreuZ18HWtxwYtxRqJJ2gPtL7NfRdl8heWTlaGyZvmT8zv6FmIzxxA==",
+      "path": "system.diagnostics.tracesource/4.3.0",
+      "hashPath": "system.diagnostics.tracesource.4.3.0.nupkg.sha512"
     },
     "system.identitymodel.tokens.jwt/5.1.4": {
       "type": "package",
@@ -4021,6 +4045,13 @@
       "sha512": "sha512-I80oVypfOvG0y0D8d0/0X/RIcAbJaFkTToy9sRJdVDVIAEImgMBEmSxxs8XpCP0PByWhOpxjRjcaGHdvNTbIUg==",
       "path": "system.io.filesystem.accesscontrol/4.0.0",
       "hashPath": "system.io.filesystem.accesscontrol.4.0.0.nupkg.sha512"
+    },
+    "system.linq.dynamic.core/1.0.7.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bt/dzI4v7lBJWULpPszAfDJOALaS08A6yddghODuFmQ7VRbtmOI4ZEjTnhjrrUczg4ayifq59G9Fpflci7I3cQ==",
+      "path": "system.linq.dynamic.core/1.0.7.6",
+      "hashPath": "system.linq.dynamic.core.1.0.7.6.nupkg.sha512"
     },
     "system.net.websockets/4.3.0": {
       "type": "package",

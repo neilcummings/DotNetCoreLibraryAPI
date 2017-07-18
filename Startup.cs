@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Serialization;
 using NLog.Extensions.Logging;
 using WebApi.Helpers;
 using WebApi.Services;
@@ -39,7 +40,10 @@ namespace WebApi
         {
             services.AddCors();
             services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase());
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
             services.AddAutoMapper();
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -55,6 +59,9 @@ namespace WebApi
                 var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
                 return new UrlHelper(actionContext);
             });
+
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddTransient<ITypeHelperService, TypeHelperService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

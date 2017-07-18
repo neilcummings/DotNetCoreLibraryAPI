@@ -65,6 +65,10 @@
         "System.IdentityModel.Tokens.Jwt": {
           "target": "Package",
           "version": "5.1.4"
+        },
+        "System.Linq.Dynamic.Core": {
+          "target": "Package",
+          "version": "1.0.7.6"
         }
       }
     }

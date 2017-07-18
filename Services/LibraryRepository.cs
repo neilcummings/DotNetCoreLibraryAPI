@@ -3,23 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApi.Entities;
 using WebApi.Helpers;
+using WebApi.Models;
 
 namespace WebApi.Services
 {
     public class LibraryRepository : ILibraryRepository
     {
         private DataContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public LibraryRepository(DataContext context)
+        public LibraryRepository(DataContext context, IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
-        
+
         public PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
-            var collectionBeforePaging = _context.Authors
-                .OrderBy(a => a.FirstName)
-                .ThenBy(a => a.LastName).AsQueryable();
+//            var collectionBeforePaging = _context.Authors
+//                .OrderBy(a => a.FirstName)
+//                .ThenBy(a => a.LastName).AsQueryable();
+
+            var collectionBeforePaging =
+                _context.Authors.ApplySort(authorsResourceParameters.OrderBy,
+                    _propertyMappingService.GetPropertyMapping<AuthorDto, Author>());
 
             if (!string.IsNullOrEmpty(authorsResourceParameters.Genre))
             {
@@ -39,10 +46,10 @@ namespace WebApi.Services
                     a.FirstName.ToLowerInvariant().Contains(searchQueryForWhereClause) ||
                     a.LastName.ToLowerInvariant().Contains(searchQueryForWhereClause));
             }
-            
-            return PagedList<Author>.Create(collectionBeforePaging, 
-                    authorsResourceParameters.PageNumber, 
-                    authorsResourceParameters.PageSize);
+
+            return PagedList<Author>.Create(collectionBeforePaging,
+                authorsResourceParameters.PageNumber,
+                authorsResourceParameters.PageSize);
         }
 
         public Author GetAuthor(Guid authorId)
@@ -62,10 +69,10 @@ namespace WebApi.Services
         {
             author.Id = Guid.NewGuid();
             _context.Authors.Add(author);
-            
+
             //the repo fills the id (instead of using identity columns
             if (!author.Books.Any()) return;
-            
+
             foreach (var book in author.Books)
             {
                 book.Id = Guid.NewGuid();
