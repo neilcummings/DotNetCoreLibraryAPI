@@ -2,7 +2,8 @@
 /Users/neil/Development/ASPNETCore/Library/server/bin/Debug/netcoreapp1.1/WebApi.runtimeconfig.json
 /Users/neil/Development/ASPNETCore/Library/server/bin/Debug/netcoreapp1.1/WebApi.runtimeconfig.dev.json
 /Users/neil/Development/ASPNETCore/Library/server/bin/Debug/netcoreapp1.1/WebApi.dll
-/Users/neil/Development/ASPNETCore/Library/server/bin/Debug/netcoreapp1.1/obj/Debug/netcoreapp1.1/WebApi.pdb
 /Users/neil/Development/ASPNETCore/Library/server/obj/Debug/netcoreapp1.1/WebApi.AssemblyInfo.cs
 /Users/neil/Development/ASPNETCore/Library/server/obj/Debug/netcoreapp1.1/WebApi.dll
 /Users/neil/Development/ASPNETCore/Library/server/obj/Debug/netcoreapp1.1/WebApi.pdb
+/Users/neil/Development/ASPNETCore/Library/server/bin/Debug/netcoreapp1.1/obj/Debug/netcoreapp1.1/WebApi.pdb
+/Users/neil/Development/ASPNETCore/Library/server/obj/Debug/netcoreapp1.1/WebApi.csprojResolveAssemblyReference.cache

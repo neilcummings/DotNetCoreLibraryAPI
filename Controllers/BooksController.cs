@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +18,17 @@ namespace WebApi.Controllers
     {
         private ILibraryRepository _libraryRepository;
         private ILogger<BooksController> _logger;
+        private IUrlHelper _urlHeler;
 
-        public BooksController(ILibraryRepository libraryRepository, ILogger<BooksController> logger)
+        public BooksController(ILibraryRepository libraryRepository, ILogger<BooksController> logger,
+            IUrlHelper urlHelper)
         {
             _libraryRepository = libraryRepository;
             _logger = logger;
+            _urlHeler = urlHelper;
         }
-        
-        [HttpGet()]
+
+        [HttpGet(Name = "GetBooksForAuthor")]
         public IActionResult GetBooksForAuthor(Guid authorId)
         {
             if (!_libraryRepository.AuthorExists(authorId))
@@ -34,7 +38,15 @@ namespace WebApi.Controllers
 
             var booksForAuthor = Mapper.Map<IEnumerable<BookDto>>(booksForAuthorFromRepo);
 
-            return Ok(booksForAuthor);
+            booksForAuthor = booksForAuthor.Select(book =>
+            {
+                book = CreateLinksForBook(book);
+                return book;
+            });
+            
+            var wrapper = new LinkedCollectionResourceWrapperDto<BookDto>(booksForAuthor);
+
+            return Ok(CreateLinksForBooks(wrapper));
         }
 
         [HttpGet("{bookId}", Name = "GetBookForAuthor")]
@@ -50,10 +62,10 @@ namespace WebApi.Controllers
 
             var book = Mapper.Map<BookDto>(bookFromRepo);
 
-            return Ok(book);
+            return Ok(CreateLinksForBook(book));
         }
 
-        [HttpPost()]
+        [HttpPost(Name = "CreateBookForAuthor")]
         public IActionResult CreateBookForAuthor(Guid authorId, [FromBody] BookForCreationDto book)
         {
             if (book == null)
@@ -61,7 +73,8 @@ namespace WebApi.Controllers
 
             if (book.Description == book.Title)
             {
-                ModelState.AddModelError(nameof(BookForCreationDto), "The description should be different from the title");
+                ModelState.AddModelError(nameof(BookForCreationDto),
+                    "The description should be different from the title");
             }
 
             if (!ModelState.IsValid)
@@ -73,18 +86,19 @@ namespace WebApi.Controllers
                 return NotFound();
 
             var bookEntity = Mapper.Map<Book>(book);
-            
+
             _libraryRepository.AddBookForAuthor(authorId, bookEntity);
-            
-            if(!_libraryRepository.Save())
+
+            if (!_libraryRepository.Save())
                 throw new Exception($"Creating a book for author with id: {authorId} failed on save");
 
             var bookToReturn = Mapper.Map<BookDto>(bookEntity);
 
-            return CreatedAtRoute("GetBookForAuthor", new {authorId = authorId, bookId = bookToReturn.Id}, bookToReturn);
+            return CreatedAtRoute("GetBookForAuthor", new {authorId = authorId, bookId = bookToReturn.Id},
+                CreateLinksForBook(bookToReturn));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteBookForAuthor")]
         public IActionResult DeleteBookForAuthor(Guid authorId, Guid id)
         {
             if (!_libraryRepository.AuthorExists(authorId))
@@ -93,20 +107,20 @@ namespace WebApi.Controllers
             var bookForAuthorFromRepo = _libraryRepository.GetBookForAuthor(authorId, id);
             if (bookForAuthorFromRepo == null)
                 return NotFound();
-            
+
             _libraryRepository.DeleteBook(bookForAuthorFromRepo);
 
             if (!_libraryRepository.Save())
             {
                 throw new Exception($"Deleting book {id} for author {authorId} failed on save");
             }
-            
+
             _logger.LogInformation(100, $"Book {id} for author {authorId} has been deleted");
 
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateBookForAuthor")]
         public IActionResult UpdateBookForAuthor(Guid authorId, Guid id, [FromBody] BookForUpdateDto book)
         {
             if (book == null)
@@ -114,14 +128,15 @@ namespace WebApi.Controllers
 
             if (book.Description == book.Title)
             {
-                ModelState.AddModelError(nameof(BookForUpdateDto), "The provided description should not match the title");
+                ModelState.AddModelError(nameof(BookForUpdateDto),
+                    "The provided description should not match the title");
             }
 
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
-            
+
             if (!_libraryRepository.AuthorExists(authorId))
                 return NotFound();
 
@@ -130,9 +145,9 @@ namespace WebApi.Controllers
             {
                 var bookToAdd = Mapper.Map<Book>(book);
                 bookToAdd.Id = id;
-                
+
                 _libraryRepository.AddBookForAuthor(authorId, bookToAdd);
-                
+
                 if (!_libraryRepository.Save())
                 {
                     throw new Exception($"upserting book {id} for author {authorId} failed on save");
@@ -140,11 +155,12 @@ namespace WebApi.Controllers
 
                 var bookToReturn = Mapper.Map<BookDto>(bookToAdd);
 
-                return CreatedAtRoute("GetBookForAuthor", new {authorId = authorId, bookId = bookToReturn.Id}, bookToReturn);
+                return CreatedAtRoute("GetBookForAuthor", new {authorId = authorId, bookId = bookToReturn.Id},
+                    bookToReturn);
             }
 
             Mapper.Map(book, bookForAuthorFromRepo);
-            
+
             _libraryRepository.UpdateBookForAuthor(bookForAuthorFromRepo);
 
             if (!_libraryRepository.Save())
@@ -155,13 +171,13 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateBookForAuthor")]
         public IActionResult PartiallyUpdateBookForAuthor(Guid authorId, Guid id,
             [FromBody] JsonPatchDocument<BookForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
                 return BadRequest();
-            
+
             if (!_libraryRepository.AuthorExists(authorId))
                 return NotFound();
 
@@ -170,7 +186,7 @@ namespace WebApi.Controllers
             {
                 var bookDto = new BookForUpdateDto();
                 patchDoc.ApplyTo(bookDto, ModelState);
-                
+
                 if (bookDto.Description == bookDto.Title)
                 {
                     ModelState.AddModelError(nameof(BookForUpdateDto), "The description cannot match the title");
@@ -185,7 +201,7 @@ namespace WebApi.Controllers
 
                 var bookToAdd = Mapper.Map<Book>(bookDto);
                 bookToAdd.Id = id;
-                
+
                 _libraryRepository.AddBookForAuthor(authorId, bookToAdd);
 
                 if (!_libraryRepository.Save())
@@ -200,7 +216,7 @@ namespace WebApi.Controllers
             }
 
             var bookToPatch = Mapper.Map<BookForUpdateDto>(bookForAuthorFromRepo);
-            
+
 //            patchDoc.ApplyTo(bookToPatch, ModelState);
             patchDoc.ApplyTo(bookToPatch);
 
@@ -215,17 +231,37 @@ namespace WebApi.Controllers
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
-           
+
             Mapper.Map(bookToPatch, bookForAuthorFromRepo);
-            
+
             _libraryRepository.UpdateBookForAuthor(bookForAuthorFromRepo);
-            
+
             if (!_libraryRepository.Save())
             {
                 throw new Exception($"Patching book {id} for author {authorId} failed on save");
             }
 
             return NoContent();
+        }
+
+        private BookDto CreateLinksForBook(BookDto book)
+        {
+            book.Links.Add(new LinkDto(_urlHeler.Link("GetBookForAuthor", new {id = book.Id}), "self", "GET"));
+            book.Links.Add(new LinkDto(_urlHeler.Link("DeleteBookForAuthor", new {id = book.Id}), "delete_book",
+                "DELETE"));
+            book.Links.Add(new LinkDto(_urlHeler.Link("UpdateBookForAuthor", new {id = book.Id}), "update_book",
+                "PUT"));
+            book.Links.Add(new LinkDto(_urlHeler.Link("PartiallyUpdateBookForAuthor", new {id = book.Id}),
+                "partially_update_book", "PATCH"));
+            return book;
+        }
+
+        private LinkedCollectionResourceWrapperDto<BookDto> CreateLinksForBooks(
+            LinkedCollectionResourceWrapperDto<BookDto> booksWrapper)
+        {
+            booksWrapper.Links.Add(new LinkDto(_urlHeler.Link("GetBooksForAuthor", new {}), "self", "GET"));
+            
+            return booksWrapper;
         }
     }
 }
